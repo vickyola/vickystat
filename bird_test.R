@@ -23,12 +23,7 @@ names(bdata) #read header csv
 names(eubirds)
 
 data_species <- (unique(bdata$Common.Name))
-data_species
-eubirds$Englisch
 
-length(data_species)
-unique(bdata$Common.Name)
-       
 
 #compare species in data frame with EU birds#
 rel_species <- list()
@@ -38,7 +33,7 @@ for(i in seq_along(data_species)){
     #print(data_species[i])}}
 
 rel_species #species in both datasets
-rel_species
+
 ####################################################################################
 #check datasets
 #if("Common Kestrel" %in% eubirds$Englisch){print('yep')}else{print('nope')}
@@ -101,7 +96,7 @@ tail(names(sort(table(det_species))), 2)
 
 
 ############################################################################################
-
+#set species
 species <- "Eurasian Jay"
 
 ############################################################################################
@@ -159,10 +154,10 @@ for(s in rel_species){
   cat_vec <- c()
   for(i in unique(dat_eu$Site)){cat_vec <- append(cat_vec,unique(dat_eu[dat_eu$Site == i,]$edge_length_class ))#permanent_grassland_proportion_class ))
   } 
-  outpu <- c(s,cor.test(cat_vec,species_vec, method="pearson")$p.value)
+  #outpu <- c(s,cor.test(cat_vec,species_vec, method="pearson")$p.value)#does this work ?no!no binary data
   outpu_c <- c(s,chisq.test(table(cat_vec,species_vec))$p.value)
   
-  print(outpu)
+  print(outpu_c)
 }
 
 
@@ -188,7 +183,3 @@ pt +  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 #number of difference species/site
 for (site in c(unique(bdata$Site))){print(paste('Site',site,':',length(unique(bdata[bdata$Site == site,  ]$Common.Name))))}
-
-#test test
-
-
