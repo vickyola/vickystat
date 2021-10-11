@@ -160,10 +160,6 @@ for(s in rel_species){
   print(outpu_c)
 }
 
-
-
-
-
 #number of sites relevant species occure:
 for(i in rel_species){output <- c(i,length(unique(dat_eu[dat_eu$Common.Name == i,]$Site)))
 print(output)}
