@@ -12,8 +12,8 @@ occ_data <- readRDS("occ_data.RDS")
 # Select a species.
 species <- "Eurasian Skylark"
 
-dates <- unique(binded_df$datetime)
-sites <- unique(binded_df$site)
+dates <- unique(occ_data$date)
+sites <- unique(occ_data$site)
 
 occ_data_wide <- data.frame(matrix(0,length(sites), length(dates)+6))
 colnames(occ_data_wide) <- c("site",as.character(dates),
