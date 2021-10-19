@@ -4,10 +4,25 @@ library("sp")
 library("raster")
 library("rgdal")
 library("tidyverse")
+extrafont::loadfonts(device="win")
 library("ggplot2")
 library("graphics")
 library("ggridges")
 library("hrbrthemes")
+library("showtext")
+library("sysfonts")
+library("showtextdb")
+library("magrittr")
+showtext_auto()
+
+#hrbrthemes::import_roboto_condensed() 
+#fonts
+library("extrafont")
+#font_import()
+
+#loadfonts(device = "win") #funktioniert nicht und dauert ewig
+#font_path()
+#windowsFonts()
 
 #load data:
 
@@ -101,7 +116,7 @@ tail(names(sort(table(det_species))), 2)
 
 ############################################################################################
 #set species
-species <-"Mute Swan"
+species <-"Short-toed Treecreeper"
 
 ############################################################################################
 #data cut Rank
@@ -114,16 +129,16 @@ data_rank <- subset(bdata, bdata$Rank == 1)
 #combine classes
 plotdata <- data_rank[c("Site","Common.Name","permanent_grassland_proportion_class","edge_length_class","date")]
 
-dat_class <- plotdata %>%
-  pivot_longer("permanent_grassland_proportion_class" : "edge_length_class", names_to = "which_class", values_to = "class")
-print(dat_class)
+#dat_class <- plotdata %>%
+ # pivot_longer("permanent_grassland_proportion_class" : "edge_length_class", names_to = "which_class", values_to = "class")
+#print(dat_class)
 ###########################################################################################
 # Plotting
 
-#rigidline with one grad cut date
+#rigidline with one grad cut date #all species
 head(data_rank)
 
-ggplot(data_rank[data_rank$Common.Name == species,], aes(x = edge_length_class , y = as.character(date), fill = as.character(date))) +
+ggplot(data_rank, aes(x = edge_length_class , y = as.character(Common.Name), fill = as.character(Common.Name))) +
   geom_density_ridges() +
   theme_ridges() + 
   theme(legend.position = "none")
@@ -132,23 +147,35 @@ ggplot(data_rank[data_rank$Common.Name == species,], aes(x = edge_length_class ,
 #Density plot with both variables: 
 
 
-# Chart
-p <- ggplot(data_rank[data_rank$Common.Name == species,], aes(x=x) ) +
+q <- ggplot(data_rank[data_rank$Common.Name == species,], aes(x=x) ) +
+  ggtitle(species)+
+  theme(plot.title = element_text(size= 4))+
   # Top
   geom_density( aes(x = permanent_grassland_proportion_class, y =  ..density..), fill="#69b3a2" ) +
-  #geom_label( aes(x=4.5, y=0.25, label="variable1"), color="#69b3a2") +
+  geom_label( aes(x=4.5, y=0.6, label="permanent grassland proportion"), color="#69b3a2") +
   # Bottom
   geom_density( aes(x = edge_length_class,  y =  -..density..), fill= "#404080") +
-  #geom_label( aes(x=4.5, y=-0.25, label="variable2"), color="#404080") +
-  theme_ipsum() +
+  geom_label( aes(x=4.5, y=-0.6, label="edge length"), color="#404080") +
+  #theme_ipsum() +
   xlab("class")
 
-p
-i <- species
-#save in loop with i
-ggsave(file=paste0("plotsR/plot_", i,".svg"), plot=p, width=10, height=8)
+q
+ggsave(file=paste0("plotsR/plot_",species,".png"), plot=q, width=10, height=8)
 
-
+for(i in data_species){
+  p <- ggplot(data_rank[data_rank$Common.Name == i,], aes(x=x) ) +
+  ggtitle(i)+
+  theme(plot.title = element_text(size= 4))+
+  # Top
+  geom_density( aes(x = permanent_grassland_proportion_class, y =  ..density..), fill="#69b3a2" ) +
+  geom_label( aes(x=4.5, y=0.6, label="permanent grassland proportion"), color="#69b3a2") +
+  # Bottom
+  geom_density( aes(x = edge_length_class,  y =  -..density..), fill= "#404080") +
+  geom_label( aes(x=4.5, y=-0.6, label="edge length"), color="#404080") +
+  theme_ipsum() +
+  xlab("class")
+  ggsave(file=paste0("plotsR/plot_", i,".png"), plot=p, width=10, height=8)
+}
 
 
 #Barplot
