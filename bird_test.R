@@ -6,24 +6,28 @@ library("rgdal")
 library("tidyverse")
 library("ggplot2")
 library("graphics")
-
+library("ggridges")
+library("hrbrthemes")
 
 #load data:
 
 #read csv file Version 1! version2 would be better, where is it?
 
-#bdata <- read.csv(here("bird_classification_v1","bird_classification_v1.csv"), check.names=TRUE,sep=",")
 bdata <- read.csv(here("bird_classification_v1","bird_classification_v1.csv"), check.names=TRUE,sep=",")
 #farmland: EUFarmlandBirdsVicky.csv
 #forest EUForestbBirdsVicky.csv
 
-eubirds <- read.csv(here("EUForestbBirdsVicky.csv"), check.names=TRUE,sep=";")
+#AgrarlandSpecies.csv
 
-names(bdata) #read header csv
-names(eubirds)
+#eubirds <- read.csv(here("AgrarlandSpecies.csv"), check.names=TRUE,sep=";")
+
+#names(bdata) #read header csv
+
+#names(eubirds)
 
 data_species <- (unique(bdata$Common.Name))
 
+data_species
 
 #compare species in data frame with EU birds#
 rel_species <- list()
@@ -97,20 +101,97 @@ tail(names(sort(table(det_species))), 2)
 
 ############################################################################################
 #set species
-species <- "Eurasian Jay"
+species <-"Mute Swan"
 
 ############################################################################################
 #data cut Rank
 data_rank <- subset(bdata, bdata$Rank == 1)
 
 #data cut eu birds
-dat_eu <- subset(data_rank, data_rank$Common.Name %in% rel_species )
-sort(table(dat_eu$Common.Name))
+#dat_eu <- subset(data_rank, data_rank$Common.Name %in% rel_species )
+#sort(table(dat_eu$Common.Name))
 
-#data cut common
-#commonbirds <- tail(names(sort(table(data_rank$Common.Name))), 15)# 15 most common
-#data_cb <- subset(data_rank,data_rank$Common.Name%in%commonbirds)
-#data_cb_day <- subset(data_rank,data_rank$Common.Name%in%commonbirds & data_rank$date == 20210524)
+#combine classes
+plotdata <- data_rank[c("Site","Common.Name","permanent_grassland_proportion_class","edge_length_class","date")]
+
+dat_class <- plotdata %>%
+  pivot_longer("permanent_grassland_proportion_class" : "edge_length_class", names_to = "which_class", values_to = "class")
+print(dat_class)
+###########################################################################################
+# Plotting
+
+#rigidline with one grad cut date
+head(data_rank)
+
+ggplot(data_rank[data_rank$Common.Name == species,], aes(x = edge_length_class , y = as.character(date), fill = as.character(date))) +
+  geom_density_ridges() +
+  theme_ridges() + 
+  theme(legend.position = "none")
+#y hast to be categorical!
+
+#Density plot with both variables: 
+
+
+# Chart
+p <- ggplot(data_rank[data_rank$Common.Name == species,], aes(x=x) ) +
+  # Top
+  geom_density( aes(x = permanent_grassland_proportion_class, y =  ..density..), fill="#69b3a2" ) +
+  #geom_label( aes(x=4.5, y=0.25, label="variable1"), color="#69b3a2") +
+  # Bottom
+  geom_density( aes(x = edge_length_class,  y =  -..density..), fill= "#404080") +
+  #geom_label( aes(x=4.5, y=-0.25, label="variable2"), color="#404080") +
+  theme_ipsum() +
+  xlab("class")
+
+p
+i <- species
+#save in loop with i
+ggsave(file=paste0("plotsR/plot_", i,".svg"), plot=p, width=10, height=8)
+
+
+
+
+#Barplot
+#sitedata <-table(plotdata[plotdata$Common.Name == species, ]$Site)
+barplot(table(factor(plotdata[plotdata$Common.Name == species, ]$Site, levels = unique(plotdata$permanent_grassland_proportion_class))))
+
+df<- as.data.frame(table(factor(plotdata[plotdata$Common.Name == species, ]$Site)))
+df
+
+#Hier
+
+
+#################################################################################
+
+
+
+
+
+
+
+rlang::last_error()#permanent_grassland_proportion_class
+#edge_length_class
+length(unique(data_rank$edge_length_class))
+
+data <- edge_length_class
+
+
+unique(data_rank$edge_length_class)
+unique(data_rank$permanent_grassland_proportion_class)
+
+
+
+###################################################################################
+
+#Class, number of sites for prmc, number of sites for pglpc
+for(i in unique(data_rank$edge_length_class)){
+  edgc <- length(unique(data_rank[data_rank$edge_length_class ==i,]$Site))
+  pmnc <- length(unique(data_rank[data_rank$permanent_grassland_proportion_class ==i,]$Site))
+  print(c ("class:", i, edgc, pmnc))
+  }
+for(i in unique(data_rank$permanent_grassland_proportion_class)){
+  print(anz)
+}
 
 
 ################################################################################
@@ -159,6 +240,10 @@ for(s in rel_species){
   
   print(outpu_c)
 }
+
+
+
+
 
 #number of sites relevant species occure:
 for(i in rel_species){output <- c(i,length(unique(dat_eu[dat_eu$Common.Name == i,]$Site)))
