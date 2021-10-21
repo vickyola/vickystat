@@ -1,0 +1,144 @@
+library("here")
+library("conflicted")
+library("readxl")
+library("sp")
+library("raster")
+library("rgdal")
+library("tidyverse")
+#extrafont::loadfonts(device="win") #?
+library("ggplot2")
+library("graphics")
+library("ggridges")
+library("hrbrthemes")
+library("sysfonts")
+library("showtextdb")
+library("showtext")
+library("magrittr")
+showtext_auto()
+library("plotly")
+library("viridis")
+
+
+#load data:
+
+#read csv file Version 1! version2 would be better, where is it?
+
+bdata <- read.csv(here("bird_classification_v1","bird_classification_v1.csv"), check.names=TRUE,sep=",")
+
+data_species <- (unique(bdata$Common.Name))
+
+data_species
+############################################################################################
+#data cut
+#Rank
+data_rank <- badata[badata$Rank == 1,]
+
+plotdata <- data_rank[c("Site","Common.Name","permanent_grassland_proportion_class","edge_length_class","date")]
+
+# creating new dataframe with pipe
+#eventuell erstmal ohne pipe und dann anchbauen?
+
+site_in_class <-  aggregate(x = (plotdata$Site), #input data
+                            by = list(plotdata$permanent_grassland_proportion_class), #grouping indicator list!
+                            FUN = function(x){length(unique(x))} )#function to apply
+#dasselbe:
+site_in_grassclass <- aggregate(Site ~ permanent_grassland_proportion_class, data = plotdata, FUN =  function(x){length(unique(x))})
+
+
+
+#Make new dataframe with class overview
+#site_in_edgeclass <- aggregate(Site ~ edge_length_class, data = plotdata, FUN =  function(x){length(unique(x))})
+#site_in_grassclass$Siteedge <- site_in_edgeclass$Site
+#colnames(site_in_grassclass) <- c("class", "grass", "edge")
+#dfclass <-site_in_grassclass
+# pivot_longer("permanent_grassland_proportion_class" : "edge_length_class", names_to = "which_class", values_to = "class")
+#print(dat_class)
+
+############################################################################################
+#set species
+species <-"White Stork"
+
+###########################################################################################
+# Plotting
+
+#rigidline with one grad cut date #all species
+head(data_rank)
+
+ggplot(data_rank, aes(x = permanent_grassland_proportion_class , y = as.character(Common.Name), fill = as.character(Common.Name))) +
+  geom_density_ridges() +
+  theme_ridges() + 
+  theme(legend.position = "none")+xlab("Permanent grassland proportion class") +ylab("Common Name")
+
+#y hast to be categorical!
+
+#Density plot with both variables: #dauert ewig was ist das Problem?
+
+
+q <- ggplot(plotdata[plotdata$Common.Name == species,], aes(x=x) ) +
+  ggtitle(species)+
+  theme(plot.title = element_text(size= 4))+
+  # Top
+  geom_density( aes(x = permanent_grassland_proportion_class, y =  ..density..) ) +
+ # geom_label( aes(x=4.5, y=0.6, label="permanent grassland proportion"), color="#69b3a2") +
+  # Bottom
+  geom_density( aes(x = edge_length_class,  y =  -..density..)) +
+  #geom_label( aes(x=4.5, y=-0.6, label="edge length"), color="#404080") +
+  xlab("class")
+
+q
+#ggsave(file=paste0("plotsR/plot_",species,".png"), plot=q, width=10, height=8)
+
+
+for(species in data_species){
+  p <- ggplot(plotdata[plotdata$Common.Name == species,], aes(x=permanent_grassland_proportion_class)) + 
+  geom_density(fill="#339966", color="#339966", alpha=0.8)+theme_minimal(base_size = 30)+xlab("permanent grassland proportion class") + ggtitle(species)
+  ggsave(file=paste0("plotsR/gras_",species,".png"), plot=p, width=10, height=8)
+  e <- ggplot(plotdata[plotdata$Common.Name == species,], aes(x=edge_length_class)) + 
+  geom_density(fill="#734d26", color="#734d26", alpha=0.8)+theme_minimal(base_size = 30)+xlab("edge length class") + ggtitle(species)
+  ggsave(file=paste0("plotsR/edge_",species,".png"), plot=e, width=10, height=8)}
+  
+
+ggsave(file=paste0("plotsR/plot_",species,".png"), plot=q, width=10, height=8)
+
+#base_size = 22 #test size whole plot put in theme
+
+#Barplot
+#sitedata <-table(plotdata[plotdata$Common.Name == species, ]$Site)
+barplot(table(factor(plotdata[plotdata$Common.Name == species, ]$Site, levels = unique(plotdata$permanent_grassland_proportion_class))))
+
+df<- as.data.frame(table(factor(plotdata[plotdata$Common.Name == species, ]$Site)))
+df
+
+
+#################################################################################
+#Interactive Plotting
+data <- plotdata#  %>% filter(year=="2007") %>% dplyr::select(-year)
+
+# Interactive version
+p <- data %>%
+ # mutate(gdpPercap=round(gdpPercap,0)) %>%
+ # mutate(pop=round(pop/1000000,2)) %>%
+ # mutate(lifeExp=round(lifeExp,1)) %>%
+  
+  # Reorder countries to having big bubbles on top
+ # arrange(desc(pop)) %>%
+ # mutate(country = factor(country, country)) %>%
+  
+  # prepare text for tooltip
+ # mutate(text = paste("Country: ", country, "\nPopulation (M): ", pop, "\nLife Expectancy: ", lifeExp, "\nGdp per capita: ", gdpPercap, sep="")) %>%
+  
+  # Classic ggplot
+  ggplot( aes(x=permanent_grassland_proportion_class, y=Site, size = pop, color = Common.Name)) + #, text=text
+  geom_point(alpha=0.7) +
+  scale_size(range = c(1.4, 19), name="Population (M)") +
+  scale_color_viridis(discrete=TRUE, guide=FALSE) +
+  theme_minimal +
+  theme(legend.position="none")
+
+# turn ggplot interactive with plotly
+pp <- ggplotly(p, tooltip="text")
+pp
+
+# save the widget
+# library(htmlwidgets)
+# saveWidget(pp, file=paste0( getwd(), "/HtmlWidget/ggplotlyBubblechart.html"))
