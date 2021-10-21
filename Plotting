@@ -31,7 +31,7 @@ data_species
 ############################################################################################
 #data cut
 #Rank
-data_rank <- badata[badata$Rank == 1,]
+data_rank <- bdata[bdata$Rank == 1,]
 
 plotdata <- data_rank[c("Site","Common.Name","permanent_grassland_proportion_class","edge_length_class","date")]
 
@@ -44,6 +44,16 @@ site_in_class <-  aggregate(x = (plotdata$Site), #input data
 #dasselbe:
 site_in_grassclass <- aggregate(Site ~ permanent_grassland_proportion_class, data = plotdata, FUN =  function(x){length(unique(x))})
 
+#subsettting df for single occurence
+plotdat_occu <- plotdata %>%  distinct(Common.Name , Site, .keep_all= TRUE)
+#dasselbe
+#plotdata_occu <- plotdata[!duplicated(plotdata[c("Common.Name", "Site")]),]
+
+#!
+
+#new collumn counts of occurence
+
+plotdat_occu_count <- plotdata%>% group_by(Site, Common.Name) %>% mutate(numocc = length((Common.Name)) ) %>%  distinct(Common.Name , Site, .keep_all= TRUE) 
 
 
 #Make new dataframe with class overview
@@ -111,33 +121,26 @@ df
 
 
 #################################################################################
-#Interactive Plotting
-data <- plotdata#  %>% filter(year=="2007") %>% dplyr::select(-year)
+#Interactive Plotting 
+#choose dataset to plot
+data <- plotdat_occu_count#  %>% filter(year=="2007") %>% dplyr::select(-year)
 
-# Interactive version
-p <- data %>%
- # mutate(gdpPercap=round(gdpPercap,0)) %>%
- # mutate(pop=round(pop/1000000,2)) %>%
- # mutate(lifeExp=round(lifeExp,1)) %>%
-  
-  # Reorder countries to having big bubbles on top
- # arrange(desc(pop)) %>%
- # mutate(country = factor(country, country)) %>%
-  
-  # prepare text for tooltip
- # mutate(text = paste("Country: ", country, "\nPopulation (M): ", pop, "\nLife Expectancy: ", lifeExp, "\nGdp per capita: ", gdpPercap, sep="")) %>%
-  
-  # Classic ggplot
-  ggplot( aes(x=permanent_grassland_proportion_class, y=Site, size = pop, color = Common.Name)) + #, text=text
-  geom_point(alpha=0.7) +
-  scale_size(range = c(1.4, 19), name="Population (M)") +
-  scale_color_viridis(discrete=TRUE, guide=FALSE) +
-  theme_minimal +
-  theme(legend.position="none")
 
-# turn ggplot interactive with plotly
-pp <- ggplotly(p, tooltip="text")
-pp
+#overview occurence Bubble Plot #irgendwie size  zu Summe machen
+
+cls <-ggplot(data, aes(x= edge_length_class, y= Common.Name ,size = numocc ,color = Common.Name)) +
+  geom_point(alpha = 0.5) +
+  scale_size(range = c(.1, 24) )+
+  scale_fill_viridis() +
+  labs(x="edge length class", y="Common Name", size="Number of detections", 
+       col="Common Name")+
+    theme_bw()
+cls
+
+
+count(bdata[bdata$Common.Name== "Willow Warbler" & bdata$Site == 2 & bdata$Rank ==1,])
+
+
 
 # save the widget
 # library(htmlwidgets)
