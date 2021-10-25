@@ -25,6 +25,19 @@ library("viridis")
 
 bdata <- read.csv(here("bird_classification_v1","bird_classification_v1.csv"), check.names=TRUE,sep=",")
 
+plotdat_occu_count <- bdata %>%  dplyr::filter(Rank==1,) %>%
+  dplyr::select("Site","Common.Name","permanent_grassland_proportion_class","edge_length_class","date")%>% 
+  group_by(Site, Common.Name) %>% mutate(numocc = length((Common.Name)) ) %>%
+  distinct(Common.Name , Site, .keep_all= TRUE) 
+#Site categorical
+plotdat_occu_count$Site = as.factor(plotdat_occu_count$Site)#vllt nich?
+#ordering 
+plotdat_occu_count$Site <- reorder(plotdat_occu_count$Site,plotdat_occu_count$permanent_grassland_proportion_class)
+
+
+
+#Site as.character reorder Site after class 
+
 data_species <- (unique(bdata$Common.Name))
 
 data_species
@@ -128,15 +141,22 @@ data <- plotdat_occu_count#  %>% filter(year=="2007") %>% dplyr::select(-year)
 
 #overview occurence Bubble Plot #irgendwie size  zu Summe machen
 
-cls <-ggplot(data, aes(x= edge_length_class, y= Common.Name ,size = numocc ,color = Common.Name)) +
+pos <- data %>% 
+  group_by(edge_length_class)  %>% 
+  summarize(avg = Site) %>% 
+  pull(avg)
+
+
+cls <-ggplot(data, aes(x= Site, y= Common.Name,colour = Common.Name ,size = numocc )) +
   geom_point(alpha = 0.5) +
   scale_size(range = c(.1, 24) )+
-  scale_fill_viridis() +
-  labs(x="edge length class", y="Common Name", size="Number of detections", 
+  scale_color_viridis(discrete=TRUE, guide=FALSE,option = "turbo")+
+  scale_x_discrete(expand=c(0.1, 0.8))+ 
+  labs(x ="Site", y= "Common Name", size = "number of detections", 
        col="Common Name")+
-    theme_bw()
+  theme_minimal() +
+  theme(axis.text=element_text(size=8),legend.position = "none") 
 cls
-
 
 count(bdata[bdata$Common.Name== "Willow Warbler" & bdata$Site == 2 & bdata$Rank ==1,])
 
