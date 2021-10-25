@@ -14,7 +14,7 @@ library("hrbrthemes")
 library("magrittr")
 library("viridis")
 library("RColorBrewer")
-
+library("tidytext")
 #load data:
 
 #read csv file Version 1! version2 would be better, where is it?
@@ -59,19 +59,23 @@ return(plus)
 ```
 
 
-```{r, out.width="100%"}
+```{r, out.width="100%",fig.dim = c(10, 24)}
 #overview occurence Bubble Plot
-cls <-ggplot(data, aes(x= Site, y= Common.Name,colour = Common.Name ,size = numocc )) +
-  geom_point(alpha = 0.5) +
+
+cls <-ggplot(data, aes(x= Site, y=reorder_within(x = Common.Name, by = numocc, within=Common.Name, FUN =sum ),size =      numocc,color=as.factor(numocc) )) + #colour = Common.Name ,
+  geom_point(alpha = 0.5,aes(fill = numocc)) + 
+  scale_fill_viridis( option="A")+
   scale_size(range = c(.1, 24) )+
   scale_color_viridis(discrete=TRUE, guide=FALSE,option = "turbo")+
-  scale_x_discrete()+ 
-  scale_y_discrete()+ #expand = expansion(mult = .05)
-  labs(x ="site", y= "Common Name", size = "number of detections", 
+  scale_y_reordered() +
+  labs(x ="Site", y= "Common Name", size = "number of detections", 
        col="Common Name")+
-  theme_minimal() +
-  theme(axis.text=element_text(size=8),legend.position = "none") 
+  theme_minimal()  +
+    #  expand_limits(y= c(-4, length(levels(data$Common.Name)) + 4))+
+  theme(axis.text=element_text(size=8),legend.position = "none")
+
 cls
+
 
 
 ```
