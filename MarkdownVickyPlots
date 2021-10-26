@@ -65,17 +65,13 @@ cls <-ggplot(data, aes(x= Site, y=reorder_within(x = Common.Name, by = numocc, w
   labs(x ="Site", y= "Common Name", size = "Number of detections", col="Number of detections")+
   theme_minimal()  +
   theme(axis.text=element_text(size=8),legend.position = "bottom") +
-   guides(color= guide_legend(), size=guide_legend())
+   guides(color= guide_legend(), size=guide_legend())+
+   ggtitle("Detections per species per site")
 
 
 ```
 ```{r, out.width="100%",fig.dim = c(10, 24)}
-#overview occurence Bubble Plot
-
-
 cls
-#detections per species per site
-
 ```
 
 
