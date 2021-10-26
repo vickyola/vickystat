@@ -15,6 +15,9 @@ library("magrittr")
 library("viridis")
 library("RColorBrewer")
 library("tidytext")
+library("cowplot")
+library("grid")
+library("gridExtra") 
 #load data:
 
 #read csv file Version 1! version2 would be better, where is it?
@@ -52,28 +55,31 @@ data <- plotdat_occu_count  #  %>% filter(year=="2007") %>% dplyr::select(-year)
         #           labels = unique(data$edge_length_class))+ #limits = pos,
         
   
-```
 
 
-```{r, out.width="100%",fig.dim = c(10, 24)}
-#overview occurence Bubble Plot
 
-cls <-ggplot(data, aes(x= Site, y=reorder_within(x = Common.Name, by = numocc, within=Common.Name, FUN =sum ),size =      numocc,color=as.factor(numocc) )) + #colour = Common.Name ,
-  geom_point(alpha = 0.5,aes(fill = numocc)) + 
-  scale_fill_viridis( option="A")+
-  scale_size(range = c(.1, 24) )+
-  scale_color_viridis(discrete=TRUE, guide=FALSE,direction =- 1,option = "viridis")+
+
+
+cls <-ggplot(data, aes(x= Site, y=reorder_within(x = Common.Name, by = numocc, within=Common.Name, FUN =sum ),size =      numocc,color=as.factor(numocc) )) + 
+  ggtitle("Detections per species per site")+
+  geom_point(alpha = 0.5,aes(fill = numocc,size =numocc)) + 
+  scale_fill_viridis(option="viridis", direction = -1, guide = "none" ) +
+  #scale_size_continuous(range = c(1, 24)) +  #?
+  scale_size(range = c(.1, 24))+
+  scale_color_viridis(discrete=TRUE, guide="none",direction =- 1,option = "viridis")+
+  #scale_color_continuous(range = c(1, 24))+ #?
   scale_y_reordered() +
   labs(x ="Site", y= "Common Name", size = "number of detections", 
        col="Common Name")+
   theme_minimal()  +
-    #  expand_limits(y= c(-4, length(levels(data$Common.Name)) + 4))+
   theme(axis.text=element_text(size=8),legend.position = "none")
+```
 
+```{r, out.width="100%",fig.dim = c(10, 24)}
+#overview occurence Bubble Plot
 
 cls
-
-
+#detections per species per site
 
 ```
 
