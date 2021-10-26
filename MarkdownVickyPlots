@@ -54,29 +54,24 @@ data <- plotdat_occu_count  #  %>% filter(year=="2007") %>% dplyr::select(-year)
  # scale_x_discrete(limits = pos,
         #           labels = unique(data$edge_length_class))+ #limits = pos,
         
-  
 
-
-
-
-
-cls <-ggplot(data, aes(x= Site, y=reorder_within(x = Common.Name, by = numocc, within=Common.Name, FUN =sum ),size =      numocc,color=as.factor(numocc) )) + 
-  ggtitle("Detections per species per site")+
-  geom_point(alpha = 0.5,aes(fill = numocc,size =numocc)) + 
-  scale_fill_viridis(option="viridis", direction = -1, guide = "none" ) +
-  #scale_size_continuous(range = c(1, 24)) +  #?
-  scale_size(range = c(.1, 24))+
-  scale_color_viridis(discrete=TRUE, guide="none",direction =- 1,option = "viridis")+
-  #scale_color_continuous(range = c(1, 24))+ #?
+cls <-ggplot(data, aes(x= Site, y=reorder_within(x = Common.Name, by = numocc, within=Common.Name, FUN =sum ))) + #colour = Common.Name ,
+  geom_point(alpha = 0.5,aes(size = numocc,color=numocc ) )+ #,aes(fill = numocc)
+  #scale_color_viridis(discrete = TRUE, guide = "none",option = "viridis",direction = -1) + #range = c(.1, 24), , guide = "none",
+  #scale_fill_viridis( option="A")+ 
+  scale_color_continuous(type = "viridis",direction = -1)+ # limits=c(0, max(data$numocc)), breaks=waiver()seq(0,max(data$numocc), by=10000   oder range = c(1, 15)
+  scale_size(range = c(.1, 22))+
   scale_y_reordered() +
-  labs(x ="Site", y= "Common Name", size = "number of detections", 
-       col="Common Name")+
+  labs(x ="Site", y= "Common Name", size = "Number of detections", col="Number of detections")+
   theme_minimal()  +
-  theme(axis.text=element_text(size=8),legend.position = "none")
-```
+  theme(axis.text=element_text(size=8),legend.position = "bottom") +
+   guides(color= guide_legend(), size=guide_legend())
 
+
+```
 ```{r, out.width="100%",fig.dim = c(10, 24)}
 #overview occurence Bubble Plot
+
 
 cls
 #detections per species per site
