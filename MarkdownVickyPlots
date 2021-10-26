@@ -51,11 +51,7 @@ data <- plotdat_occu_count  #  %>% filter(year=="2007") %>% dplyr::select(-year)
  # scale_x_discrete(limits = pos,
         #           labels = unique(data$edge_length_class))+ #limits = pos,
         
-        
-limit_fun <- function(x){
-plus <- x * 0.1
-return(plus)
-}        
+  
 ```
 
 
@@ -66,13 +62,14 @@ cls <-ggplot(data, aes(x= Site, y=reorder_within(x = Common.Name, by = numocc, w
   geom_point(alpha = 0.5,aes(fill = numocc)) + 
   scale_fill_viridis( option="A")+
   scale_size(range = c(.1, 24) )+
-  scale_color_viridis(discrete=TRUE, guide=FALSE,option = "turbo")+
+  scale_color_viridis(discrete=TRUE, guide=FALSE,direction =- 1,option = "viridis")+
   scale_y_reordered() +
   labs(x ="Site", y= "Common Name", size = "number of detections", 
        col="Common Name")+
   theme_minimal()  +
     #  expand_limits(y= c(-4, length(levels(data$Common.Name)) + 4))+
   theme(axis.text=element_text(size=8),legend.position = "none")
+
 
 cls
 
